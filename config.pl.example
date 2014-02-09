@@ -1,0 +1,22 @@
+#!/usr/bin/perl -w
+use DBI;
+
+$config = {
+    'dsn'             => 'dbi:mysql:mysql_read_default_file=/home/user/.my.cnf:mysql_auto_reconnect=1',
+    'db_name'         => 'database',
+    'db_table'        => 'owntracks',
+
+    'data_js'         => '../site/owntracks-gmap-plot-data.js',
+
+    'mqtt_sub'        => '/usr/bin/mosquitto_sub',
+    'mqtt_pub'        => '/usr/bin/mosquitto_pub',
+    'mqtt_host'       => 'localhost',
+    'mqtt_port'       => '1883',
+    'mqtt_user'       => 'username',
+    'mqtt_pass'       => 'password',
+    'subscribe_topic' => '/owntracks/#',
+};
+
+$dbh = DBI->connect($dsn) or die("Can't connect ($DBI::err):$DBI::errstr\n");
+$dbh->do("USE $$config{db_name}");
+

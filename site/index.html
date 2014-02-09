@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OwnTrack markers on Google Maps</title>
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+      #panel {
+        position: absolute;
+        top: 5px;
+        left: 50%;
+        margin-left: -180px;
+        z-index: 5;
+        background-color: #fff;
+        padding: 5px;
+        border: 1px solid #999;
+
+        font-size: 12px;
+        font-family: "Ubuntu", "Verdana", "Tahoma", "Arial";
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script src="owntracks-gmaps-main.js"></script>
+    <script src="owntracks-gmaps-data.js"></script>
+    <script> google.maps.event.addDomListener(window, 'load', initialize); </script>
+  </head>
+  <body>
+    <div id="panel">
+        <input type="button" onclick="displayMarkers();" value="Update">
+        acc:<input type="text" id="allowacc" size="4" value="150"> skipped events: <span id="skipcnt">[click update]</span><br/>
+        acc flag legend:<br/>
+        A&lt;=25m, B&lt;=50m, C&lt;=75m, D&lt;=100m, E&lt;=150m, F&gt;=150m
+    </div>
+    <div id="map-canvas"></div>
+  </body>
+</html>
+

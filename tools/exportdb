@@ -1,0 +1,25 @@
+#!/usr/bin/perl -w
+use strict;
+use DBI;
+
+my $config; my $dbh;
+eval `cat ../config.pl`;
+if ($@) { die "config.pl had errors: $@ ($!)\n"; }
+
+open (FD, ">$$config{data_js}") or die "Can't write fdi.js: $!\n";
+print FD "var owntracksMarkers = [";
+
+my $sth = $dbh->prepare("SELECT lat, lon, acc, tst FROM $$config{db_table} ORDER BY id ASC") or die "SQL Prepare failed ($DBI::err):$DBI::errstr\n";
+$sth->execute();
+while (my $row = $sth->fetchrow_hashref()) {
+    print FD "{";
+    print FD "'lat':'$$row{lat}',";
+    print FD "'lon':'$$row{lon}',";
+    print FD "'acc':'$$row{acc}',";
+    print FD "'tst':'$$row{tst}'},";
+}
+$sth->finish();
+
+print FD "{}];";
+close(FD);
+exit 0;

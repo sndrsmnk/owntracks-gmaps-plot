@@ -1,0 +1,101 @@
+#!/usr/bin/perl -w
+use strict;
+use JSON;
+use DBI;
+
+my $config; my $dbh;
+eval `cat ../config.pl`;
+if ($@) { die "config.pl had errors: $@ ($!)\n"; }
+
+open(MQTT, "$$config{mqtt_sub} -h $$config{mqtt_host} -p $$config{mqtt_port} -u $$config{mqtt_user} -P $$config{mqtt_pass} -v -t '$$config{subscribe_topic}'|") or die "Can't fork: $!\n";
+while (my $line = <MQTT>) {
+    $line =~ s/\r?\n$//;
+    if ($line =~ m#(/[^\s]+)\s(\{[^\}]+\})#) {
+        my ($topic, $data) = ($1, $2);
+        processEvent($topic, $data);
+    }
+}
+close(MQTT);
+
+
+#
+#
+#
+
+
+sub processEvent {
+    my ($topic, $data) = @_;
+
+    print "Topic: $topic\n";
+    print "Data: $data\n";
+    
+    my $obj = decodeJSON($data);
+    if (ref($obj) ne "HASH") {
+        print "decode of data failed.";
+        return;
+    }
+
+    # Fiddle some bits
+    ($$obj{device}) = $topic =~ m#^$$config{subscribe_topic}/(.*)#;
+    my @x = localtime($$obj{tst});
+    $$obj{tst} = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $x[5]+1900, $x[4]+1, $x[3], $x[2], $x[1], $x[0]);
+    print "Time: " . $$obj{tst} . "\n";
+
+    if ($$obj{_type} eq "location") {
+        my @sql_values = ();
+        my $sql = "INSERT INTO $$config{db_table} (";
+        foreach my $key (qw(device lat lon acc batt tst)) {
+            $sql .= "`$key`, ";
+            push @sql_values, $$obj{$key};
+        }
+        $sql =~ s/,\s$/) VALUES (/;
+        $sql .= "?, " x scalar(@sql_values);
+        $sql =~ s/,\s$/);/;
+
+        my $sth = $dbh->prepare($sql) or warn "SQL Prepare failed: $DBI::errstr ($!)\n";
+        $sth->execute(@sql_values) or warn "SQL Execute failed: $DBI::errstr ($!)\n";
+        $sth->finish();
+        print "Stored as ID ". $dbh->{mysql_insertid} . "\n";
+
+    } elsif ($$obj{_type} eq "lwt") {
+        print "Disconnect event for device " . ($$obj{device}||"?") . "\n";
+
+    } else {
+        print "Unhandled message type '" . $$obj{_type} . "'\n";
+
+    }
+}
+
+
+
+# Takes Perl structure, returns scalar with JSON data
+sub encodeJSON {
+    my ($blob) = @_;
+
+    my $jsonblob = "";
+    eval { $jsonblob = encode_json($blob) };
+    if ($@ =~ m#Undefined subroutine.*encode_json called#) {
+        eval { $jsonblob = objToJson($blob) };
+        return $@ if ($@ ne "");
+    }
+    return $@ if ($@ ne "");
+    return "encodeJSON failed." if ($jsonblob eq "");
+    return $jsonblob;
+}
+
+
+
+# Takes scalar with JSON data, returns Perl structure
+sub decodeJSON {
+    my ($jsonblob) = @_;
+
+    my $blob = "";
+    eval { $blob = decode_json($jsonblob) };
+    if ($@ =~ m#Undefined subroutine.*code_json called#) {
+        eval { $blob = objFromJson($jsonblob) };
+        return $@ if ($@ ne "");
+    } 
+    return $@ if ($@ ne "");
+    return "decodeJSON failed." if ($blob eq "");
+    return $blob;
+}
