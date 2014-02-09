@@ -1,0 +1,8 @@
+# To protect the data file, use this
+#
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} /owntracks-gmaps-data.js$
+RewriteCond %{REMOTE_ADDR} !^192\.168\.0
+RewriteCond %{REMOTE_ADDR} !^10\.255\.128\.
+RewriteCond %{REMOTE_ADDR} !^2001:db8:42:666:
+RewriteRule . - [F]
