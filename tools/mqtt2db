@@ -7,7 +7,12 @@ my $config; my $dbh;
 eval `cat ../config.pl`;
 if ($@) { die "config.pl had errors: $@ ($!)\n"; }
 
-open(MQTT, "$$config{mqtt_sub} -h $$config{mqtt_host} -p $$config{mqtt_port} -u $$config{mqtt_user} -P $$config{mqtt_pass} -v -t '$$config{subscribe_topic}'|") or die "Can't fork: $!\n";
+if (defined $ARGV[0] and -e $ARGV[0]) {
+    open(MQTT, "<".$ARGV[0]) or die "Can't read $ARGV[0]: $!\n";
+} else {
+    open(MQTT, "$$config{mqtt_sub} -h $$config{mqtt_host} -p $$config{mqtt_port} -u $$config{mqtt_user} -P $$config{mqtt_pass} -v -t '$$config{subscribe_topic}'|") or die "Can't fork: $!\n";
+}
+
 while (my $line = <MQTT>) {
     $line =~ s/\r?\n$//;
     if ($line =~ m#(/[^\s]+)\s(\{[^\}]+\})#) {
@@ -36,7 +41,7 @@ sub processEvent {
     }
 
     # Fiddle some bits
-    ($$obj{device}) = $topic =~ m#^$$config{subscribe_topic}/(.*)#;
+    ($$obj{device}) = $topic =~ m#^/[^/]+/(.*)#;
     my @x = localtime($$obj{tst});
     $$obj{tst} = sprintf("%04d-%02d-%02d %02d:%02d:%02d", $x[5]+1900, $x[4]+1, $x[3], $x[2], $x[1], $x[0]);
     print "Time: " . $$obj{tst} . "\n";
