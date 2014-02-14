@@ -6,6 +6,7 @@ use DBI;
 my $config; my $dbh;
 eval `cat ../config.pl`;
 if ($@) { die "config.pl had errors: $@ ($!)\n"; }
+$dbh->{mysql_auto_reconnect} = 1;
 
 if (defined $ARGV[0] and -e $ARGV[0]) {
     open(MQTT, "<".$ARGV[0]) or die "Can't read $ARGV[0]: $!\n";
