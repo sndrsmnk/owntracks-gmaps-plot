@@ -15,8 +15,14 @@ $config = {
     'mqtt_user'       => 'username',
     'mqtt_pass'       => 'password',
     'subscribe_topic' => '/owntracks/#',
+
+    'ip_acl' => [
+        qw#^127\.0\.0\.1#,
+        qr#^192\.168\.#,
+        qr#^2001:db8:202:#,
+        qr#^2001:db8:3:1000:#,
+    ],
 };
 
 $dbh = DBI->connect($dsn) or die("Can't connect ($DBI::err):$DBI::errstr\n");
 $dbh->do("USE $$config{db_name}");
-
