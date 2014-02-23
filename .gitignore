@@ -1,8 +1,8 @@
-# created by tools/exportdb
-site/owntracks-gmaps-data.js
-
-# created by user, see htaccess.example
+# htaccess
 site/.htaccess
+
+# jquery copies
+site/jquery*
 
 # created by user, see config.pl.example
 config.pl
