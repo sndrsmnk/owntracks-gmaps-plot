@@ -41,7 +41,8 @@
         min_tst:<input type="text" id="min_tst" size="13" value="1970-01-01"><br/>
         max_tst:<input type="text" id="max_tst" size="13" value="2037-12-31"><br/>
         accuracy:<input type="text" id="acc" size="4" value="150"><span style="font-size: 9px;">(lower is better)</span><br/>
-        <input type="button" onclick="displayMarkers();" value="Update"><br/>
+        <input type="button" onclick="displayMarkers();" value="Update">
+        <input type="button" onclick="animateMarkers(0);" value="Animate"><br/>
         marker legend: (accuracy)<br/>
         A&lt;=25m, B&lt;=50m, C&lt;=75m,<br/>
         D&lt;=100m, E&lt;=150m, F&gt;=150m
@@ -58,17 +59,7 @@
         if (day < 10) { max_tst_default = max_tst_default + '0' + day; }
             else { max_tst_default = max_tst_default + day; }
 
-        var today = d.getDate();
-        d.setDate(today - 1);
-        var min_tst_default = d.getFullYear() + '-';
-        var month = (d.getMonth() + 1);
-        if (month < 10) { min_tst_default = min_tst_default + '0' + month + '-'; }
-            else { min_tst_default = min_tst_default + month + '-'; }
-        var day = d.getDate();
-        if (day < 10) { min_tst_default = min_tst_default + '0' + day; }
-            else { min_tst_default = min_tst_default + day; }
-
-        document.getElementById('min_tst').value=min_tst_default;
+        document.getElementById('min_tst').value=max_tst_default;
         document.getElementById('max_tst').value=max_tst_default;
     </script>
   </body>

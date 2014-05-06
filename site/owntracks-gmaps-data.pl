@@ -24,6 +24,9 @@ my $acc = $cgi->param('acc') || 150;
 my $min_tst = $cgi->param('min_tst') || '1970-01-01';
 my $max_tst = $cgi->param('max_tst') || '2037-12-31';
 
+$min_tst .= " 00:00:00" if ($min_tst =~ m#^\d{4}-\d{2}-\d{2}$#);
+$max_tst .= " 23:59:59" if ($max_tst =~ m#^\d{4}-\d{2}-\d{2}$#);
+
 my $sth = $dbh->prepare(
     "SELECT lat, lon, acc, tst
         FROM $$config{db_table}
